@@ -75,6 +75,7 @@ protected:
     float m_height = 0.0f;
     float m_collisionRadius = 0.0f;
     int m_value = 0;
+    bool m_isPlayer = false;
     std::shared_ptr<GameSprite> m_sprite;
 
 public:
@@ -96,7 +97,7 @@ public:
     }
     void setSprite(std::shared_ptr<GameSprite> sprite) { m_sprite = std::move(sprite); }
     int getValue() const { return m_value; }
-
+    void setisPlayer(bool isPlayer) { m_isPlayer = isPlayer; }
     void setBounds(int w, int h);
     void normalize();
     void bounce();

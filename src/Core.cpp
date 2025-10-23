@@ -13,8 +13,51 @@ void Creature::normalize() {
 
 void Creature::bounce() {
     // should implement boundary controls here
+    /* Using the coordinates of the visible area added a boundary at each maximum and minimum
+    Made the NPC fish change direction*/
+    int bouncecasex = 0; 
+    if (m_x <= -13){
+        bouncecasex = 1;
+    }
+    else if (m_x>= 967){
+        bouncecasex = 2;
+    }
+    int bouncecasey = 0;
+    if (m_y <= -21){
+        bouncecasey = 1;
+    }
+    else if (m_y >= 720){
+        bouncecasey = 2;
+    }
+    switch(bouncecasex){
+        case 1:
+            m_x += 5;
+            if (!m_isPlayer){ 
+                m_dx = -m_dx;
+            }
+            break;
+        case 2:
+            m_x -= 5;
+            if(!m_isPlayer){
+                m_dx = -m_dx;
+            }
+            break;
+    }
+    switch(bouncecasey){
+        case 1:
+            m_y += 5;
+            if(!m_isPlayer){
+                m_dy = -m_dy;
+            }
+            break;
+        case 2:
+            m_y -= 5;
+            if(!m_isPlayer){
+                m_dy = -m_dy;
+            }
+            break;
+    }
 }
-
 
 void GameEvent::print() const {
         

@@ -15,7 +15,9 @@ string AquariumCreatureTypeToString(AquariumCreatureType t){
 
 // PlayerCreature Implementation
 PlayerCreature::PlayerCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
-: Creature(x, y, speed, 10.0f, 1, sprite) {}
+: Creature(x, y, speed, 10.0f, 1, sprite) {
+    m_isPlayer = true;
+}
 
 
 void PlayerCreature::setDirection(float dx, float dy) {
