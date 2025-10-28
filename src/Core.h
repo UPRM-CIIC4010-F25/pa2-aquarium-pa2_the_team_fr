@@ -101,6 +101,7 @@ public:
     void setBounds(int w, int h);
     void normalize();
     void bounce();
+    void bump(std::shared_ptr<Creature> other);
 };
 
 // GameEvents

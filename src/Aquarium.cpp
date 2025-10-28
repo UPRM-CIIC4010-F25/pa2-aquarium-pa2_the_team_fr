@@ -175,6 +175,13 @@ void Aquarium::update() {
     for (auto& creature : m_creatures) {
         creature->move();
     }
+   /*for(auto& a: m_creatures){
+        for(auto& b: m_creatures){
+            if(a != b && checkCollision(a,b)){
+                a->bump(b);
+            }
+        }
+    }*/
     this->Repopulate();
 }
 
@@ -344,7 +351,7 @@ void AquariumLevel::populationReset(){
 
 void AquariumLevel::ConsumePopulation(AquariumCreatureType creatureType, int power){
     for(std::shared_ptr<AquariumLevelPopulationNode> node: this->m_levelPopulation){
-        ofLogVerbose() << "consuming from this level creatures" << endl;
+         ofLogVerbose() << "consuming from this level creatures" << endl;
         if(node->creatureType == creatureType){
             ofLogVerbose() << "-cosuming from type: " << AquariumCreatureTypeToString(node->creatureType) <<" , currPop: " << node->currentPopulation << endl;
             if(node->currentPopulation == 0){

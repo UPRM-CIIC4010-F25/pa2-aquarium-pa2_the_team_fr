@@ -91,8 +91,23 @@ void GameEvent::print() const {
 
 // collision detection between two creatures
 bool checkCollision(std::shared_ptr<Creature> a, std::shared_ptr<Creature> b) {
-    return false; 
-};
+    float xdif = a->getX() - b->getX();
+    float ydif = a->getY() - b->getY();
+    float dmagnitude = std::sqrt(xdif * xdif + ydif * ydif);
+    return dmagnitude < a-> getCollisionRadius() + b->getCollisionRadius();
+    };
+
+    /*void Creature::bump(std::shared_ptr<Creature> other) {
+    float xdif = getX() - other->getX();
+    float ydif = getY() - other->getY();
+    float dmagnitude = std::sqrt(xdif * xdif + ydif * ydif);
+    if (dmagnitude !=0){
+        xdif /= dmagnitude;
+        ydif /= dmagnitude;
+    }
+    m_x += xdif * 50; // bump away by 5 units
+    m_y += ydif * 50;
+   }*/
 
 
 string GameSceneKindToString(GameSceneKind t){
