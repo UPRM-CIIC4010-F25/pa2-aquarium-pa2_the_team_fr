@@ -76,6 +76,9 @@ protected:
     float m_collisionRadius = 0.0f;
     int m_value = 0;
     bool m_isPlayer = false;
+    bool m_isItem = false;
+    bool m_isExtraHealth = false;
+    bool m_isSpeedUp = false;
     std::shared_ptr<GameSprite> m_sprite;
 
 public:
@@ -97,11 +100,15 @@ public:
     }
     void setSprite(std::shared_ptr<GameSprite> sprite) { m_sprite = std::move(sprite); }
     int getValue() const { return m_value; }
+    bool getisItem() const { return m_isItem; }
+    bool getisExtraHealth() const { return m_isExtraHealth; }
+    bool getisSpeedUp() const { return m_isSpeedUp; }
     void setisPlayer(bool isPlayer) { m_isPlayer = isPlayer; }
+    bool getisPlayer() const { return m_isPlayer; }
     void setBounds(int w, int h);
     void normalize();
     void bounce();
-    void bump(std::shared_ptr<Creature> other);
+    void bump();
 };
 
 // GameEvents

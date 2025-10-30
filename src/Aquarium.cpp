@@ -8,8 +8,10 @@ string AquariumCreatureTypeToString(AquariumCreatureType t){
             return "BiggerFish";
         case AquariumCreatureType::NPCreature:
             return "BaseFish";
+        case AquariumCreatureType::ClownFish:
+            return "ClownFish";
         default:
-            return "UknownFish";
+            return "UnknownFish";
     }
 }
 
@@ -73,6 +75,25 @@ void PlayerCreature::loseLife(int debounce) {
     }
 }
 
+void PlayerCreature::heal(){
+    if(m_lives < 5){
+    this->m_lives += 1;
+    }
+    else{
+        this->m_lives = 5;
+    }
+        ofLogNotice() << "Player gained an extra life! Lives now: " << m_lives << std::endl;
+    }
+/*void PlayerCreature::bump() {
+    // Simple bump logic: reverse direction and move a bit
+    m_dx = -m_dx;
+    m_dy = -m_dy;
+    normalize();
+    m_x += m_dx * m_speed * 2; // Move back quickly
+    m_y += m_dy * m_speed * 2;
+    bounce();
+}*/
+
 // NPCreature Implementation
 NPCreature::NPCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
 : Creature(x, y, speed, 30, 1, sprite) {
@@ -133,11 +154,78 @@ void BiggerFish::draw() const {
     this->m_sprite->draw(this->m_x, this->m_y);
 }
 
+ClownFish::ClownFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
+: NPCreature(x, y, speed, sprite) {
+    m_dx = (rand() % 3 - 1);
+    m_dy = (rand() % 3 - 1);
+    normalize();
+
+    setCollisionRadius(25); // Clown fish have a smaller collision radius
+    m_value = 2; // Clown fish have a moderate value
+    m_creatureType = AquariumCreatureType::ClownFish;
+}
+
+void ClownFish::move() {
+   
+    m_x += m_dx * (m_speed * 1.5);
+    m_y += m_dy * (m_speed * 1.5);
+    if(m_dx < 0 ){
+        this->m_sprite->setFlipped(true);
+    }else {
+        this->m_sprite->setFlipped(false);
+    }
+
+    bounce();
+}
+
+void ClownFish::draw() const {
+    ofLogVerbose() << "ClownFish at (" << m_x << ", " << m_y << ") with speed " << m_speed << std::endl;
+    this->m_sprite->draw(this->m_x, this->m_y);
+}
+
+ExtraLife::ExtraLife(float x, float y, std::shared_ptr<GameSprite> sprite)
+: NPCreature(x, y, 0, sprite) {
+    m_dx = 0;
+    m_dy = 0;
+
+    setCollisionRadius(20); // Extra life has a small collision radius
+    m_value = 0; // Extra life does not contribute to score
+    m_creatureType = AquariumCreatureType::ExtraLife;
+    m_isItem = true;
+    m_isExtraHealth = true;
+}
+
+SpeedUp::SpeedUp(float x, float y, std::shared_ptr<GameSprite> sprite)
+: NPCreature(x, y, 0, sprite) {
+    m_dx = 0;
+    m_dy = 0;
+
+    setCollisionRadius(20); // Speed up has a small collision radius
+    m_value = 0; // Speed up does not contribute to score
+    m_creatureType = AquariumCreatureType::SpeedUp;
+    m_isItem = true;
+    m_isSpeedUp = true;
+}
+
+void ExtraLife::draw() const {
+    ofLogVerbose() << "ExtraLife at (" << m_x << ", " << m_y << ")" << std::endl;
+    this->m_sprite->draw(this->m_x, this->m_y);
+}
+
+
+
+void SpeedUp::draw() const {
+    ofLogVerbose() << "SpeedUp at (" << m_x << ", " << m_y << ")" << std::endl;
+    this->m_sprite->draw(this->m_x, this->m_y);
+}
 
 // AquariumSpriteManager
 AquariumSpriteManager::AquariumSpriteManager(){
     this->m_npc_fish = std::make_shared<GameSprite>("base-fish.png", 70,70);
     this->m_big_fish = std::make_shared<GameSprite>("bigger-fish.png", 120, 120);
+    this->m_clown_fish = std::make_shared<GameSprite>("clown-fish.png", 40,40);
+    this->m_extra_life = std::make_shared<GameSprite>("extra-life.png", 40, 40);
+    this->m_speed_up = std::make_shared<GameSprite>("speed-up.png", 40, 40);
 }
 
 std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureType t){
@@ -147,6 +235,16 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
             
         case AquariumCreatureType::NPCreature:
             return std::make_shared<GameSprite>(*this->m_npc_fish);
+        
+        case AquariumCreatureType::ClownFish:
+            return std::make_shared<GameSprite>(*this->m_clown_fish);
+
+        case AquariumCreatureType::ExtraLife:
+            return std::make_shared<GameSprite>(*this->m_extra_life);
+
+         case AquariumCreatureType::SpeedUp:
+            return std::make_shared<GameSprite>(*this->m_speed_up);
+         
         default:
             return nullptr;
     }
@@ -228,6 +326,15 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
         case AquariumCreatureType::BiggerFish:
             this->addCreature(std::make_shared<BiggerFish>(x, y, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::BiggerFish)));
             break;
+        case AquariumCreatureType::ClownFish:
+            this->addCreature(std::make_shared<ClownFish>(x, y, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::ClownFish)));
+            break;
+        case AquariumCreatureType::ExtraLife:
+            this->addCreature(std::make_shared<ExtraLife>(x, y, this->m_sprite_manager->GetSprite(AquariumCreatureType::ExtraLife)));
+            break;
+        case AquariumCreatureType::SpeedUp:
+            this->addCreature(std::make_shared<SpeedUp>(x, y, this->m_sprite_manager->GetSprite(AquariumCreatureType::SpeedUp)));
+            break;
         default:
             ofLogError() << "Unknown creature type to spawn!";
             break;
@@ -293,6 +400,18 @@ void AquariumGameScene::Update(){
         if (event != nullptr && event->isCollisionEvent()) {
             ofLogVerbose() << "Collision detected between player and NPC!" << std::endl;
             if(event->creatureB != nullptr){
+
+                if (event->creatureB->getisItem()){
+                    ofLogNotice() << "Player collected an item!" << std::endl;
+                    this->m_aquarium->removeCreature(event->creatureB);
+                    if(event->creatureB->getisExtraHealth()){
+                        this->m_player->heal();}
+                    else if (event->creatureB->getisSpeedUp()){
+                        this->m_player->changeSpeed(this->m_player->getSpeed() + 1);
+                    }
+
+                    return;
+                }
                 event->print();
                 if(this->m_player->getPower() < event->creatureB->getValue()){
                     ofLogNotice() << "Player is too weak to eat the creature!" << std::endl;
