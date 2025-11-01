@@ -4,6 +4,7 @@
 #include <memory>
 #include <iostream>
 #include <algorithm>
+#include <string>
 #include "Core.h"
 
 
@@ -11,6 +12,7 @@ enum class AquariumCreatureType {
     NPCreature,
     BiggerFish,
     ClownFish,
+    BalloonFish,
     ExtraLife,
     SpeedUp
 };
@@ -71,6 +73,7 @@ public:
     void heal();
     void increasePower(int value) { m_power += value; }
     void reduceDamageDebounce();
+    void bump(std::shared_ptr<Creature> other);
     
 private:
     int m_score = 0;
@@ -104,6 +107,13 @@ public:
     void draw() const override;
 };
 
+class BalloonFish : public NPCreature {
+public:
+    BalloonFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite);
+    void ballmove(std::shared_ptr<Creature> other);
+    void draw() const override;
+};
+
 class ExtraLife : public NPCreature {
 public: 
     ExtraLife(float x, float y, std::shared_ptr<GameSprite> sprite);
@@ -128,6 +138,7 @@ class AquariumSpriteManager {
         std::shared_ptr<GameSprite> m_clown_fish;
         std::shared_ptr<GameSprite> m_extra_life;
         std::shared_ptr<GameSprite> m_speed_up;
+        std::shared_ptr<GameSprite> m_balloon_fish;
 };
 
 
@@ -138,7 +149,7 @@ public:
     void addAquariumLevel(std::shared_ptr<AquariumLevel> level);
     void removeCreature(std::shared_ptr<Creature> creature);
     void clearCreatures();
-    void update();
+    void update(std::shared_ptr<PlayerCreature> player = nullptr);
     void draw() const;
     void setBounds(int w, int h) { m_width = w; m_height = h; }
     void setMaxPopulation(int n) { m_maxPopulation = n; }
@@ -191,7 +202,7 @@ class Level_0 : public AquariumLevel  {
     public:
         Level_0(int levelNumber, int targetScore): AquariumLevel(levelNumber, targetScore){
             this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 10));
-
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ClownFish, 5));
         };
         std::vector<AquariumCreatureType> Repopulate() override;
 
@@ -199,10 +210,12 @@ class Level_0 : public AquariumLevel  {
 class Level_1 : public AquariumLevel  {
     public:
         Level_1(int levelNumber, int targetScore): AquariumLevel(levelNumber, targetScore){
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 20));
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ClownFish, 10));
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ExtraLife, ofRandom (0,2)));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 15));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ClownFish, 5));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ExtraLife, 1));
             this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::SpeedUp, 1));
+           
+
 
         };
         std::vector<AquariumCreatureType> Repopulate() override;
@@ -212,11 +225,12 @@ class Level_1 : public AquariumLevel  {
 class Level_2 : public AquariumLevel  {
     public:
         Level_2(int levelNumber, int targetScore): AquariumLevel(levelNumber, targetScore){
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 30));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::NPCreature, 20));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ClownFish, 5));
             this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::BiggerFish, 5));
-            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ExtraLife, ofRandom (0,2)));
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::ExtraLife, 1));
             this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::SpeedUp, 1));
-
+            this->m_levelPopulation.push_back(std::make_shared<AquariumLevelPopulationNode>(AquariumCreatureType::BalloonFish, 5));
         };
         std::vector<AquariumCreatureType> Repopulate() override;
 

@@ -10,6 +10,12 @@ string AquariumCreatureTypeToString(AquariumCreatureType t){
             return "BaseFish";
         case AquariumCreatureType::ClownFish:
             return "ClownFish";
+        case AquariumCreatureType::BalloonFish:
+            return "BalloonFish";
+        case AquariumCreatureType::ExtraLife:
+            return "ExtraLife";
+        case AquariumCreatureType::SpeedUp:
+            return "SpeedUp";
         default:
             return "UnknownFish";
     }
@@ -84,15 +90,17 @@ void PlayerCreature::heal(){
     }
         ofLogNotice() << "Player gained an extra life! Lives now: " << m_lives << std::endl;
     }
-/*void PlayerCreature::bump() {
-    // Simple bump logic: reverse direction and move a bit
-    m_dx = -m_dx;
-    m_dy = -m_dy;
-    normalize();
-    m_x += m_dx * m_speed * 2; // Move back quickly
-    m_y += m_dy * m_speed * 2;
-    bounce();
-}*/
+void PlayerCreature::bump(std::shared_ptr<Creature> other) {
+    ofLogNotice() << "PlayerCreature::bump called! Other value:" << other->getValue() << ", Player power:" << getPower();
+    if(other->getValue() > getPower()){
+        m_dx = -m_dx;
+        m_dy = -m_dy;
+        normalize();
+        m_x += m_dx * m_speed * 3; 
+        m_y += m_dy * m_speed * 3;
+        bounce();
+    }
+}
 
 // NPCreature Implementation
 NPCreature::NPCreature(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
@@ -183,6 +191,29 @@ void ClownFish::draw() const {
     this->m_sprite->draw(this->m_x, this->m_y);
 }
 
+BalloonFish::BalloonFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
+: NPCreature(x, y, speed, sprite) {
+   
+    normalize();
+
+    setCollisionRadius(30); 
+    m_value = 3;
+    m_creatureType = AquariumCreatureType::BalloonFish;
+    m_isBall = true;
+
+}
+
+void BalloonFish::ballmove(std::shared_ptr<Creature> other) {
+   
+    Creature::ballmove(other);
+    bounce();
+}
+
+void BalloonFish::draw() const {
+    ofLogVerbose() << "BalloonFish at (" << m_x << ", " << m_y << ") with speed " << m_speed << std::endl;
+    this->m_sprite->draw(this->m_x, this->m_y);
+}
+
 ExtraLife::ExtraLife(float x, float y, std::shared_ptr<GameSprite> sprite)
 : NPCreature(x, y, 0, sprite) {
     m_dx = 0;
@@ -226,6 +257,7 @@ AquariumSpriteManager::AquariumSpriteManager(){
     this->m_clown_fish = std::make_shared<GameSprite>("clown-fish.png", 40,40);
     this->m_extra_life = std::make_shared<GameSprite>("extra-life.png", 40, 40);
     this->m_speed_up = std::make_shared<GameSprite>("speed-up.png", 40, 40);
+    this->m_balloon_fish = std::make_shared<GameSprite>("ball-fish.png", 60, 60);
 }
 
 std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureType t){
@@ -244,6 +276,9 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
 
          case AquariumCreatureType::SpeedUp:
             return std::make_shared<GameSprite>(*this->m_speed_up);
+
+         case AquariumCreatureType::BalloonFish:
+            return std::make_shared<GameSprite>(*this->m_balloon_fish);
          
         default:
             return nullptr;
@@ -269,17 +304,19 @@ void Aquarium::addAquariumLevel(std::shared_ptr<AquariumLevel> level){
     this->m_aquariumlevels.push_back(level);
 }
 
-void Aquarium::update() {
+void Aquarium::update(std::shared_ptr<PlayerCreature> player) {
     for (auto& creature : m_creatures) {
-        creature->move();
-    }
-   /*for(auto& a: m_creatures){
-        for(auto& b: m_creatures){
-            if(a != b && checkCollision(a,b)){
-                a->bump(b);
+        if (creature->getisBall()) {  
+            if (player) {
+                creature->ballmove(player);
+                creature->bounce();  
+            } else {
+                creature->move(); 
             }
+        } else {
+            creature->move(); 
         }
-    }*/
+    }
     this->Repopulate();
 }
 
@@ -334,6 +371,9 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
             break;
         case AquariumCreatureType::SpeedUp:
             this->addCreature(std::make_shared<SpeedUp>(x, y, this->m_sprite_manager->GetSprite(AquariumCreatureType::SpeedUp)));
+            break;
+        case AquariumCreatureType::BalloonFish:
+            this->addCreature(std::make_shared<BalloonFish>(x, y, speed, this->m_sprite_manager->GetSprite(AquariumCreatureType::BalloonFish)));
             break;
         default:
             ofLogError() << "Unknown creature type to spawn!";
@@ -416,6 +456,7 @@ void AquariumGameScene::Update(){
                 if(this->m_player->getPower() < event->creatureB->getValue()){
                     ofLogNotice() << "Player is too weak to eat the creature!" << std::endl;
                     this->m_player->loseLife(3*60); // 3 frames debounce, 3 seconds at 60fps
+                    this->m_player->bump(event->creatureB);
                     if(this->m_player->getLives() <= 0){
                         this->m_lastEvent = std::make_shared<GameEvent>(GameEventType::GAME_OVER, this->m_player, nullptr);
                         return;
@@ -437,7 +478,7 @@ void AquariumGameScene::Update(){
                 ofLogError() << "Error: creatureB is null in collision event." << std::endl;
             }
         }
-        this->m_aquarium->update();
+        this->m_aquarium->update(this->m_player);
     }
 
 }

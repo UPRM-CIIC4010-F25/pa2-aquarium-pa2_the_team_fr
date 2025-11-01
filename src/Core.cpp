@@ -1,6 +1,7 @@
 #include "Core.h"
 
 
+
 // Creature Inherited Base Behavior
 void Creature::setBounds(int w, int h) { m_width = w; m_height = h; }
 void Creature::normalize() {
@@ -16,17 +17,17 @@ void Creature::bounce() {
     /* Using the coordinates of the visible area added a boundary at each maximum and minimum
     Made the NPC fish change direction*/
     int bouncecasex = 0; 
-    if (m_x <= -13){
+    if ((m_x <= -13) || ((m_x <= -10) && m_isBall)){
         bouncecasex = 1;
     }
-    else if (m_x>= 967){
+    else if ((m_x>= 967)|| ((m_x >= 960) && m_isBall)){
         bouncecasex = 2;
     }
     int bouncecasey = 0;
-    if (m_y <= -21){
+    if ((m_y <= -21) || ((m_y <= -18) && m_isBall)){
         bouncecasey = 1;
     }
-    else if (m_y >= 720){
+    else if ((m_y >= 720) || ((m_y >= 718) && m_isBall)){
         bouncecasey = 2;
     }
     switch(bouncecasex){
@@ -58,6 +59,25 @@ void Creature::bounce() {
             break;
     }
 }
+
+void Creature::ballmove(std::shared_ptr<Creature> other) {
+    if (other->m_isPlayer == true) {
+        float dx = m_x - other->m_x;
+        float dy = m_y - other->m_y;
+        float distance = sqrt(dx * dx + dy * dy);
+        
+        if (distance < 100) {
+            m_dx = dx; 
+            m_dy = dy;
+            normalize();  
+            m_x += m_dx * m_speed * 2;  
+            m_y += m_dy * m_speed * 2;
+        } else {
+            move();  
+        }
+    }
+}
+
 
 void GameEvent::print() const {
         
@@ -96,19 +116,6 @@ bool checkCollision(std::shared_ptr<Creature> a, std::shared_ptr<Creature> b) {
     float dmagnitude = std::sqrt(xdif * xdif + ydif * ydif);
     return dmagnitude < a-> getCollisionRadius() + b->getCollisionRadius();
     };
-
-    /*void Creature::bump(std::shared_ptr<Creature> other) {
-    float xdif = getX() - other->getX();
-    float ydif = getY() - other->getY();
-    float dmagnitude = std::sqrt(xdif * xdif + ydif * ydif);
-    if (dmagnitude !=0){
-        xdif /= dmagnitude;
-        ydif /= dmagnitude;
-    }
-    m_x += xdif * 50; // bump away by 5 units
-    m_y += ydif * 50;
-   }*/
-
 
 string GameSceneKindToString(GameSceneKind t){
     switch(t)

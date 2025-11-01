@@ -79,11 +79,13 @@ protected:
     bool m_isItem = false;
     bool m_isExtraHealth = false;
     bool m_isSpeedUp = false;
+    bool m_isBall = false;
     std::shared_ptr<GameSprite> m_sprite;
 
 public:
     virtual ~Creature() = default;
     virtual void move() = 0;
+    virtual void ballmove(std::shared_ptr<Creature> other);
     virtual void draw() const = 0;
 
     virtual float getCollisionRadius() const { return m_collisionRadius; }
@@ -105,10 +107,11 @@ public:
     bool getisSpeedUp() const { return m_isSpeedUp; }
     void setisPlayer(bool isPlayer) { m_isPlayer = isPlayer; }
     bool getisPlayer() const { return m_isPlayer; }
+    bool getisBall() const { return m_isBall; }
     void setBounds(int w, int h);
     void normalize();
     void bounce();
-    void bump();
+   
 };
 
 // GameEvents
