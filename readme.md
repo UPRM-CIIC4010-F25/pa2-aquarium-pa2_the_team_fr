@@ -24,8 +24,8 @@ Grading
 ## Team Info
 | Student Number | Student Name | Student Email |
 |-|-|-|
-|(STUDENT NUMBER HERE)| (STUDENT NAME HERE)| (STUDENT EMAIL HERE) |
-|(STUDENT NUMBER HERE)| (STUDENT NAME HERE)| (STUDENT EMAIL HERE) |
+802-23-7291 Anthony J. Gonzalez Carrion anthony.gonzalez20@upr.edu
+802-24-1815 Eiram G. Garcia Garcia eraim.garcia@upr.edu
 
 ---
 
