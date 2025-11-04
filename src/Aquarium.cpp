@@ -1,7 +1,6 @@
 #include "Aquarium.h"
 #include <cstdlib>
 
-
 string AquariumCreatureTypeToString(AquariumCreatureType t){
     switch(t){
         case AquariumCreatureType::BiggerFish:
@@ -27,7 +26,6 @@ PlayerCreature::PlayerCreature(float x, float y, int speed, std::shared_ptr<Game
     m_isPlayer = true;
 }
 
-
 void PlayerCreature::setDirection(float dx, float dy) {
     m_dx = dx;
     m_dy = dy;
@@ -51,9 +49,7 @@ void PlayerCreature::update() {
     this->move();
 }
 
-
 void PlayerCreature::draw() const {
-    
     ofLogVerbose() << "PlayerCreature at (" << m_x << ", " << m_y << ") with speed " << m_speed << std::endl;
     if (this->m_damage_debounce > 0) {
         ofSetColor(ofColor::red); // Flash red if in damage debounce
@@ -62,7 +58,6 @@ void PlayerCreature::draw() const {
         m_sprite->draw(m_x, m_y);
     }
     ofSetColor(ofColor::white); // Reset color
-
 }
 
 void PlayerCreature::changeSpeed(int speed) {
@@ -83,13 +78,13 @@ void PlayerCreature::loseLife(int debounce) {
 
 void PlayerCreature::heal(){
     if(m_lives < 5){
-    this->m_lives += 1;
-    }
-    else{
+        this->m_lives += 1;
+    } else {
         this->m_lives = 5;
     }
-        ofLogNotice() << "Player gained an extra life! Lives now: " << m_lives << std::endl;
-    }
+    ofLogNotice() << "Player gained an extra life! Lives now: " << m_lives << std::endl;
+}
+
 void PlayerCreature::bump(std::shared_ptr<Creature> other) {
     ofLogNotice() << "PlayerCreature::bump called! Other value:" << other->getValue() << ", Player power:" << getPower();
     if(other->getValue() > getPower()){
@@ -132,7 +127,6 @@ void NPCreature::draw() const {
     }
 }
 
-
 BiggerFish::BiggerFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
 : NPCreature(x, y, speed, sprite) {
     m_dx = (rand() % 3 - 1);
@@ -174,7 +168,6 @@ ClownFish::ClownFish(float x, float y, int speed, std::shared_ptr<GameSprite> sp
 }
 
 void ClownFish::move() {
-   
     m_x += m_dx * (m_speed * 1.5);
     m_y += m_dy * (m_speed * 1.5);
     if(m_dx < 0 ){
@@ -193,18 +186,14 @@ void ClownFish::draw() const {
 
 BalloonFish::BalloonFish(float x, float y, int speed, std::shared_ptr<GameSprite> sprite)
 : NPCreature(x, y, speed, sprite) {
-   
     normalize();
-
     setCollisionRadius(30); 
     m_value = 3;
     m_creatureType = AquariumCreatureType::BalloonFish;
     m_isBall = true;
-
 }
 
 void BalloonFish::ballmove(std::shared_ptr<Creature> other) {
-   
     Creature::ballmove(other);
     bounce();
 }
@@ -243,8 +232,6 @@ void ExtraLife::draw() const {
     this->m_sprite->draw(this->m_x, this->m_y);
 }
 
-
-
 void SpeedUp::draw() const {
     ofLogVerbose() << "SpeedUp at (" << m_x << ", " << m_y << ")" << std::endl;
     this->m_sprite->draw(this->m_x, this->m_y);
@@ -264,35 +251,26 @@ std::shared_ptr<GameSprite> AquariumSpriteManager::GetSprite(AquariumCreatureTyp
     switch(t){
         case AquariumCreatureType::BiggerFish:
             return std::make_shared<GameSprite>(*this->m_big_fish);
-            
         case AquariumCreatureType::NPCreature:
             return std::make_shared<GameSprite>(*this->m_npc_fish);
-        
         case AquariumCreatureType::ClownFish:
             return std::make_shared<GameSprite>(*this->m_clown_fish);
-
         case AquariumCreatureType::ExtraLife:
             return std::make_shared<GameSprite>(*this->m_extra_life);
-
-         case AquariumCreatureType::SpeedUp:
+        case AquariumCreatureType::SpeedUp:
             return std::make_shared<GameSprite>(*this->m_speed_up);
-
-         case AquariumCreatureType::BalloonFish:
+        case AquariumCreatureType::BalloonFish:
             return std::make_shared<GameSprite>(*this->m_balloon_fish);
-         
         default:
             return nullptr;
     }
 }
 
-
 // Aquarium Implementation
 Aquarium::Aquarium(int width, int height, std::shared_ptr<AquariumSpriteManager> spriteManager)
     : m_width(width), m_height(height) {
         m_sprite_manager =  spriteManager;
-    }
-
-
+}
 
 void Aquarium::addCreature(std::shared_ptr<Creature> creature) {
     creature->setBounds(m_width - 20, m_height - 20);
@@ -326,7 +304,6 @@ void Aquarium::draw() const {
     }
 }
 
-
 void Aquarium::removeCreature(std::shared_ptr<Creature> creature) {
     auto it = std::find(m_creatures.begin(), m_creatures.end(), creature);
     if (it != m_creatures.end()) {
@@ -348,8 +325,6 @@ std::shared_ptr<Creature> Aquarium::getCreatureAt(int index) {
     }
     return m_creatures[index];
 }
-
-
 
 void Aquarium::SpawnCreature(AquariumCreatureType type) {
     int x = rand() % this->getWidth();
@@ -379,9 +354,7 @@ void Aquarium::SpawnCreature(AquariumCreatureType type) {
             ofLogError() << "Unknown creature type to spawn!";
             break;
     }
-
 }
-
 
 // repopulation will be called from the levl class
 // it will compose into aquarium so eating eats frm the pool of NPCs in the lvl class
@@ -394,7 +367,6 @@ void Aquarium::Repopulate() {
     ofLogVerbose() << "the current index: " << selectedLevelIdx << endl;
     std::shared_ptr<AquariumLevel> level = this->m_aquariumlevels.at(selectedLevelIdx);
 
-
     if(level->isCompleted()){
         level->levelReset();
         this->currentLevel += 1;
@@ -404,8 +376,6 @@ void Aquarium::Repopulate() {
         this->clearCreatures();
     }
 
-    
-    // now lets find how many to respawn if needed 
     std::vector<AquariumCreatureType> toRespawn = level->Repopulate();
     ofLogVerbose() << "amount to repopulate : " << toRespawn.size() << endl;
     if(toRespawn.size() <= 0 ){return;} // there is nothing for me to do here
@@ -414,8 +384,6 @@ void Aquarium::Repopulate() {
     }
 }
 
-
-// Aquarium collision detection
 std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aquarium, std::shared_ptr<PlayerCreature> player) {
     if (!aquarium || !player) return nullptr;
     
@@ -427,8 +395,6 @@ std::shared_ptr<GameEvent> DetectAquariumCollisions(std::shared_ptr<Aquarium> aq
     }
     return nullptr;
 };
-
-//  Imlementation of the AquariumScene
 
 void AquariumGameScene::Update(){
     std::shared_ptr<GameEvent> event;
@@ -455,7 +421,7 @@ void AquariumGameScene::Update(){
                 event->print();
                 if(this->m_player->getPower() < event->creatureB->getValue()){
                     ofLogNotice() << "Player is too weak to eat the creature!" << std::endl;
-                    this->m_player->loseLife(3*60); // 3 frames debounce, 3 seconds at 60fps
+                    this->m_player->loseLife(3*60); // 3 seconds at 60fps
                     this->m_player->bump(event->creatureB);
                     if(this->m_player->getLives() <= 0){
                         this->m_lastEvent = std::make_shared<GameEvent>(GameEventType::GAME_OVER, this->m_player, nullptr);
@@ -469,27 +435,20 @@ void AquariumGameScene::Update(){
                         this->m_player->increasePower(1);
                         ofLogNotice() << "Player power increased to " << this->m_player->getPower() << "!" << std::endl;
                     }
-                    
                 }
-                
-                
-
             } else {
                 ofLogError() << "Error: creatureB is null in collision event." << std::endl;
             }
         }
         this->m_aquarium->update(this->m_player);
     }
-
 }
 
 void AquariumGameScene::Draw() {
     this->m_player->draw();
     this->m_aquarium->draw();
     this->paintAquariumHUD();
-
 }
-
 
 void AquariumGameScene::paintAquariumHUD(){
     float panelWidth = ofGetWindowWidth() - 150;
@@ -500,25 +459,26 @@ void AquariumGameScene::paintAquariumHUD(){
         ofSetColor(ofColor::red);
         ofDrawCircle(panelWidth + i * 20, 50, 5);
     }
-    ofSetColor(ofColor::white); // Reset color to white for other drawings
+    ofSetColor(ofColor::white); 
 }
+
 
 void AquariumLevel::populationReset(){
     for(auto node: this->m_levelPopulation){
-        node->currentPopulation = 0; // need to reset the population to ensure they are made a new in the next level
+        node->currentPopulation = 0; 
     }
 }
 
 void AquariumLevel::ConsumePopulation(AquariumCreatureType creatureType, int power){
     for(std::shared_ptr<AquariumLevelPopulationNode> node: this->m_levelPopulation){
-         ofLogVerbose() << "consuming from this level creatures" << endl;
+        ofLogVerbose() << "consuming from this level creatures" << endl;
         if(node->creatureType == creatureType){
-            ofLogVerbose() << "-cosuming from type: " << AquariumCreatureTypeToString(node->creatureType) <<" , currPop: " << node->currentPopulation << endl;
+            ofLogVerbose() << "-consuming from type: " << AquariumCreatureTypeToString(node->creatureType) <<" , currPop: " << node->currentPopulation << endl;
             if(node->currentPopulation == 0){
                 return;
             } 
             node->currentPopulation -= 1;
-            ofLogVerbose() << "+cosuming from type: " << AquariumCreatureTypeToString(node->creatureType) <<" , currPop: " << node->currentPopulation << endl;
+            ofLogVerbose() << "+consuming from type: " << AquariumCreatureTypeToString(node->creatureType) <<" , currPop: " << node->currentPopulation << endl;
             this->m_level_score += power;
             return;
         }
@@ -530,44 +490,13 @@ bool AquariumLevel::isCompleted(){
 }
 
 
-
-
-std::vector<AquariumCreatureType> Level_0::Repopulate() {
+std::vector<AquariumCreatureType> AquariumLevel::Repopulate() {
     std::vector<AquariumCreatureType> toRepopulate;
-    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
+    for (const auto& node : this->m_levelPopulation) {
         int delta = node->population - node->currentPopulation;
         ofLogVerbose() << "to Repopulate :  " << delta << endl;
-        if(delta >0){
-            for(int i = 0; i<delta; i++){
-                toRepopulate.push_back(node->creatureType);
-            }
-            node->currentPopulation += delta;
-        }
-    }
-    return toRepopulate;
-
-}
-
-std::vector<AquariumCreatureType> Level_1::Repopulate() {
-    std::vector<AquariumCreatureType> toRepopulate;
-    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
-        int delta = node->population - node->currentPopulation;
-        if(delta >0){
-            for(int i=0; i<delta; i++){
-                toRepopulate.push_back(node->creatureType);
-            }
-            node->currentPopulation += delta;
-        }
-    }
-    return toRepopulate;
-}
-
-std::vector<AquariumCreatureType> Level_2::Repopulate() {
-    std::vector<AquariumCreatureType> toRepopulate;
-    for(std::shared_ptr<AquariumLevelPopulationNode> node : this->m_levelPopulation){
-        int delta = node->population - node->currentPopulation;
-        if(delta >0){
-            for(int i=0; i<delta; i++){
+        if (delta > 0) {
+            for (int i = 0; i < delta; ++i) {
                 toRepopulate.push_back(node->creatureType);
             }
             node->currentPopulation += delta;
