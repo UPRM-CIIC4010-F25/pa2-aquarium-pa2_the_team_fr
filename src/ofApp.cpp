@@ -52,7 +52,11 @@ void ofApp::setup(){
         GameSceneKindToString(GameSceneKind::GAME_OVER),
         std::make_shared<GameSprite>("game-over.png", ofGetWindowWidth(), ofGetWindowHeight())
     ));
-
+ //Eiram added music
+    backgroundMusic.load("music/aquarium_song.mp3");
+    backgroundMusic.setLoop(true); 
+    backgroundMusic.setVolume(0.5f); 
+    backgroundMusic.play();
     ofSetLogLevel(OF_LOG_NOTICE); // Set default log level
 }
 
